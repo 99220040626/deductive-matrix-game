@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Deductive Assessment Challenge</title>
+  <style>
+
+    body{
+      margin:0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+      color:white;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      min-height:100vh;
+    }
+
+    .container{
+      background:white;
+      color:#333;
+      margin-top:50px;
+      padding:40px;
+      border-radius:12px;
+      width:500px;
+      box-shadow:0 15px 35px rgba(0,0,0,0.4);
+      text-align:center;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    h1{
+      margin-top:0;
+      font-weight:600;
+      color:#2c5364;
+    }
+
+    p{
+      color:#555;
+      font-size:14px;
+    }
+
+    select{
+      padding:8px 12px;
+      border-radius:6px;
+      border:1px solid #ccc;
+      font-size:14px;
+      margin-top:10px;
+      outline:none;
+    }
+
+    #grid{
+      display:grid;
+      gap:8px;
+      justify-content:center;
+      margin:30px 0;
+    }
+
+    input{
+      width:60px;
+      height:60px;
+      font-size:18px;
+      text-align:center;
+      border-radius:8px;
+      border:1px solid #ccc;
+      transition:0.2s;
+      outline:none;
+    }
+
+    input:focus{
+      border:2px solid #2c5364;
+      box-shadow:0 0 6px rgba(44,83,100,0.4);
+    }
+
+    button{
+      padding:10px 25px;
+      border:none;
+      border-radius:8px;
+      background:#2c5364;
+      color:white;
+      font-size:14px;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    button:hover{
+      background:#1b323d;
+      transform:scale(1.05);
+    }
+
+    .footer{
+      margin-top:20px;
+      font-size:12px;
+      color:#777;
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0;transform:translateY(10px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Deductive Challenge</h1>
+  <p>Select matrix size, enter numbers and ONE “?” then click Solve.</p>
+
+  <label><b>Matrix Size:</b></label>
+  <br>
+  <select id="sizeSelect" onchange="generateGrid()">
+    <option value="3">3 x 3</option>
+    <option value="4">4 x 4</option>
+    <option value="5">5 x 5</option>
+  </select>
+
+  <div id="grid"></div>
+
+  <button onclick="solve()">Find Missing Value</button>
+
+  <div class="footer">
+    Corporate Aptitude Assessment Portal
+  </div>
+</div>
+
+<script>
+
+let size = 3;
+generateGrid();
+
+function generateGrid(){
+
+  size = parseInt(document.getElementById("sizeSelect").value);
+  const grid = document.getElementById("grid");
+
+  grid.innerHTML = "";
+  grid.style.gridTemplateColumns = `repeat(${size},60px)`;
+
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      let input = document.createElement("input");
+      input.id = `c${r}_${c}`;
+      grid.appendChild(input);
+    }
+  }
+}
+
+function solve(){
+
+  let matrix = [];
+  let questionCell = null;
+
+  for(let r=0;r<size;r++){
+    matrix[r] = [];
+
+    for(let c=0;c<size;c++){
+
+      let val = document.getElementById(`c${r}_${c}`).value.trim();
+
+      if(val === "?"){
+        questionCell = {row:r,col:c};
+        matrix[r][c] = 0;
+      }
+      else if(val === ""){
+        matrix[r][c] = 0;
+      }
+      else{
+        matrix[r][c] = parseInt(val);
+      }
+    }
+  }
+
+  if(!questionCell){
+    alert("Please enter exactly one ?");
+    return;
+  }
+
+  if(solveMatrix(matrix)){
+    document.getElementById(
+      `c${questionCell.row}_${questionCell.col}`
+    ).value = matrix[questionCell.row][questionCell.col];
+  }
+  else{
+    alert("No valid solution possible");
+  }
+}
+
+function solveMatrix(m){
+
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+
+      if(m[r][c] === 0){
+
+        for(let num=1; num<=size; num++){
+
+          if(isSafe(m,r,c,num)){
+            m[r][c] = num;
+
+            if(solveMatrix(m))
+              return true;
+
+            m[r][c] = 0;
+          }
+        }
+
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+function isSafe(m,row,col,num){
+
+  for(let i=0;i<size;i++){
+    if(m[row][i] === num) return false;
+    if(m[i][col] === num) return false;
+  }
+
+  return true;
+}
+
+</script>
+
+</body>
+</html>
